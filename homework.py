@@ -3,6 +3,8 @@ from typing import Optional
 
 
 """Калькулятор для подсчёта денег и калорий."""
+
+
 class Record:
     """
     Создание записей: amount - потраченые деньги/ количество килокалорий
@@ -14,7 +16,7 @@ class Record:
         self.comment = comment
         if date is not None:
             moment = dt.datetime.strptime(date, '%d.%m.%Y')
-            self.date = moment.date()  #переводит строку в формат даты
+            self.date = moment.date()  # переводит строку в формат даты
         else:
             self.date = dt.date.today()  # записываем в свойство дату today()
 
