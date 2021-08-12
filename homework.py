@@ -8,14 +8,15 @@ class Record:
     Создание записей: amount - потраченые деньги/ количество килокалорий
     comment - коментарий, date - дата создания записи.
     """
-    def __init__(self, amount: float, comment: str = 'траты', date: Optional[str] = None) -> None:
+    def __init__(self, amount: float, comment: str = 'траты',
+                 date: Optional[str] = None) -> None:
         self.amount = amount
         self.comment = comment
         if date is not None:
             moment = dt.datetime.strptime(date, '%d.%m.%Y')
-            self.date = moment.date() # тут переводит строку в формат даты
+            self.date = moment.date()  #переводит строку в формат даты
         else:
-            self.date = dt.date.today()  # тут записываем в свойство дату today()
+            self.date = dt.date.today()  # записываем в свойство дату today()
 
 
 class Calculator:
@@ -67,9 +68,9 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currency: str) -> str:
         """
-        Принимать на вход обозначение валюты: одну из строк "rub", "usd" или "eur" и
-        возвращает он сообщение о состоянии дневного баланса в этой валюте, округляя
-        сумму до двух знаков после запятой.
+        Принимать на вход обозначение валюты: одну из строк "rub", "usd"
+        или "eur" и возвращает он сообщение о состоянии дневного баланса
+        в этой валюте, округляя сумму до двух знаков после запятой.
         """
         converter = {
             'usd': ('USD', self.USD_RATE),
@@ -95,18 +96,7 @@ class CaloriesCalculator(Calculator):
         calories_today = self.get_today_stats()
         calories_remained = self.limit - calories_today
         if calories_today < self.limit:
-            return 'Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более ' \
-                   f'{calories_remained} кКал'
+            return 'Сегодня можно съесть что-нибудь ещё, но с общей' \
+                   f' калорийностью не более {calories_remained} кКал'
         elif calories_today >= self.limit:
             return 'Хватит есть!'
-
-
-
-
-
-
-
-
-
-
-
