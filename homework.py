@@ -14,11 +14,11 @@ class Record:
                  date: Optional[str] = None) -> None:
         self.amount = amount
         self.comment = comment
-        if date is not None:
+        if date is None:
+            self.date = dt.date.today()  # записываем в свойство дату today()
+        else:
             moment = dt.datetime.strptime(date, '%d.%m.%Y')
             self.date = moment.date()  # переводит строку в формат даты
-        else:
-            self.date = dt.date.today()  # записываем в свойство дату today()
 
 
 class Calculator:
@@ -42,25 +42,23 @@ class Calculator:
         Считать, сколько калорий получено
         или денег потрачено сегодня.
         """
-        today_stats = 0
         today = dt.date.today()
-        for record in self.records:
-            if record.date == today:
-                today_stats += record.amount
-        return today_stats
+        return sum(record.amount for record in self.records
+                   if record.date == today)
 
     def get_week_stats(self) -> float:
         """
         Считать, сколько калорий получено
         или денег потрачено за последние 7 дней.
         """
-        week_stats = 0
         today = dt.date.today()
         week_start = today - dt.timedelta(days=7)
-        for record in self.records:
-            if week_start <= record.date <= today:
-                week_stats += record.amount
-        return week_stats
+        return sum(record.amount for record in self.records
+                   if week_start <= record.date <= today)
+
+    def get_today_remained(self) -> float:
+        """Возвращает остаток денег/ каллорий."""
+        return self.limit - self.get_today_stats()
 
 
 class CashCalculator(Calculator):
@@ -74,19 +72,18 @@ class CashCalculator(Calculator):
         или "eur" и возвращает он сообщение о состоянии дневного баланса
         в этой валюте, округляя сумму до двух знаков после запятой.
         """
+        cash_remain_rub = self.get_today_remained()
+        if cash_remain_rub == 0:
+            return 'Денег нет, держись'
         converter = {
             'usd': ('USD', self.USD_RATE),
             'eur': ('Euro', self.EURO_RATE),
             'rub': ('руб', 1)
         }
-        spend_today = self.get_today_stats()
-        cash_remain_rub = self.limit - spend_today
         name_currency, rate_currency = converter[currency]
         rest = round(abs(cash_remain_rub) / rate_currency, 2)
         if cash_remain_rub > 0:
             return f'На сегодня осталось {rest} {name_currency}'
-        elif cash_remain_rub == 0:
-            return 'Денег нет, держись'
         else:
             return f'Денег нет, держись: твой долг - {rest} {name_currency}'
 
@@ -95,10 +92,9 @@ class CaloriesCalculator(Calculator):
     """Калькулятор калорий."""
     def get_calories_remained(self) -> str:
         """Возвращает ответ - остаток калорий на сегодня."""
-        calories_today = self.get_today_stats()
-        calories_remained = self.limit - calories_today
-        if calories_today < self.limit:
-            return 'Сегодня можно съесть что-нибудь ещё, но с общей' \
-                   f' калорийностью не более {calories_remained} кКал'
-        elif calories_today >= self.limit:
+        calories_remained = self.get_today_remained()
+        if calories_remained <= 0:
             return 'Хватит есть!'
+        else:
+            return ('Сегодня можно съесть что-нибудь ещё, но с общей '
+                    f'калорийностью не более {calories_remained} кКал')
